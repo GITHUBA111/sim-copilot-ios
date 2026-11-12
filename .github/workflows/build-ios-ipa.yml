@@ -1,0 +1,87 @@
+name: Build iOS IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build-ipa:
+    name: Build Release IPA (macOS 26 Apple Silicon)
+    runs-on: macos-26
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Latest Stable Xcode
+        run: |
+          ls -d /Applications/Xcode*.app || true
+          LATEST_XCODE=$(ls -d /Applications/Xcode*.app | grep -v -i beta | sort -V | tail -n 1)
+          if [ -n "$LATEST_XCODE" ]; then
+            echo "Selecting $LATEST_XCODE"
+            sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+          fi
+          xcodebuild -version
+          swift --version
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Expo Prebuild iOS Native Project
+        env:
+          CI: '1'
+        run: npx expo prebuild --platform ios --clean --no-install
+
+      - name: Install CocoaPods
+        working-directory: ios
+        env:
+          LANG: en_US.UTF-8
+        run: pod install --repo-update
+
+      - name: Compile Release iOS App (Unsigned / Ad-Hoc)
+        working-directory: ios
+        run: |
+          WORKSPACE=$(ls -d *.xcworkspace | head -n 1)
+          SCHEME="${WORKSPACE%.xcworkspace}"
+          echo "Building Workspace=$WORKSPACE Scheme=$SCHEME"
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            build
+
+      - name: Package Universal Sideloadable IPA
+        working-directory: ios
+        run: |
+          rm -rf Payload
+          mkdir -p Payload
+          APP_PATH=$(find build/Build/Products/Release-iphoneos -maxdepth 1 -name "*.app" | head -n 1)
+          echo "Found compiled app: $APP_PATH"
+          cp -R "$APP_PATH" Payload/
+          APP_NAME=$(basename "$APP_PATH")
+          codesign --force --deep --sign - "Payload/$APP_NAME" || true
+          zip -qry SimCoPilot-2.0.0.ipa Payload
+          ls -lh SimCoPilot-2.0.0.ipa
+
+      - name: Upload SimCoPilot-2.0.0.ipa Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SimCoPilot-iOS-IPA
+          path: ios/SimCoPilot-2.0.0.ipa
+          if-no-files-found: error

@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "SimCoPilot",
+    "slug": "sim-copilot",
+    "version": "2.0.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f3f1ec",
+    "ios": {
+      "bundleIdentifier": "com.simcopilot.cockpit",
+      "buildNumber": "2",
+      "supportsTablet": true,
+      "requireFullScreen": true,
+      "infoPlist": {
+        "CFBundleDisplayName": "模拟驾驶搭子",
+        "UIStatusBarHidden": true,
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocalNetworkUsageDescription": "用于通过同一 Wi-Fi 局域网低延迟连接你的电脑端模拟驾驶伴侣（支持欧洲卡车模拟2与农场模拟2025）",
+        "NSAppTransportSecurity": {
+          "NSAllowsLocalNetworking": true,
+          "NSAllowsArbitraryLoads": true
+        }
+      }
+    },
+    "android": {
+      "package": "com.simcopilot.cockpit",
+      "adaptiveIcon": {
+        "backgroundColor": "#f3f1ec",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-audio",
+      [
+        "expo-screen-orientation",
+        {
+          "initialOrientation": "LANDSCAPE"
+        }
+      ],
+      "expo-asset"
+    ]
+  }
+}
