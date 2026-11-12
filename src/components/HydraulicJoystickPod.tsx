@@ -314,8 +314,8 @@ export const HydraulicJoystickPod: React.FC<HydraulicJoystickPodProps> = React.m
 
 const styles = StyleSheet.create({
   container: {
-    width: 196,
-    paddingHorizontal: 8,
+    width: 186,
+    paddingHorizontal: 7,
     paddingVertical: 8,
     justifyContent: 'space-between',
     gap: 6,

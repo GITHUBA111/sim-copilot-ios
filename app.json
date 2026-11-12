@@ -9,7 +9,7 @@
     "backgroundColor": "#f3f1ec",
     "ios": {
       "bundleIdentifier": "com.simcopilot.cockpit",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "supportsTablet": true,
       "requireFullScreen": true,
       "infoPlist": {

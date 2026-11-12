@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Platform,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
 } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
@@ -60,6 +60,15 @@ function readInitialSetup(): { mode: GameCockpitMode; showGarage: boolean } {
 }
 
 export default function App() {
+  return (
+    <SafeAreaProvider>
+      <CockpitMain />
+    </SafeAreaProvider>
+  );
+}
+
+function CockpitMain() {
+  const insets = useSafeAreaInsets();
   useEffect(() => {
     if (Platform.OS !== 'web') {
       activateKeepAwakeAsync().catch(() => {});
@@ -976,6 +985,9 @@ export default function App() {
             }
             onPressLinkBadge={() => setFsBay(3)}
             onToggleSound={handleToggleSound}
+            onToggleTurnSignal={(dir) =>
+              handleTurnSignalChange(fs.turnSignal === dir ? 0 : dir)
+            }
           />
           <Fs25ConsoleDeck
             fs={fs}
@@ -1084,6 +1096,12 @@ export default function App() {
             onPressLinkBadge={() => setActiveBay(3)}
             onToggleSound={handleToggleSound}
             onSwitchToFs25={() => setGarageOpen(true)}
+            onToggleTurnSignal={(dir) =>
+              handleTurnSignalChange(
+                state.turnSignal === dir ? 0 : dir,
+                dir === -1 ? 'LEFT TURN · 左转向灯' : 'RIGHT TURN · 右转向灯'
+              )
+            }
           />
           <CenterConsoleDeck
             state={state}
@@ -1259,7 +1277,17 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.safeRoot}>
+    <View
+      style={[
+        styles.safeRoot,
+        {
+          paddingTop: insets.top,
+          paddingBottom: Math.min(insets.bottom, 10),
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        },
+      ]}
+    >
       <StatusBar hidden />
       {isDesktopBrowser && (
         <Pressable
@@ -1270,7 +1298,7 @@ export default function App() {
         </Pressable>
       )}
       {unifiedShell}
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -1286,6 +1314,7 @@ const styles = StyleSheet.create({
   },
   centerColumn: {
     flex: 1,
+    minWidth: 0,
     paddingHorizontal: 4,
     paddingVertical: 8,
     gap: 8,

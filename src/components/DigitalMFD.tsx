@@ -3,19 +3,21 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line, Path, Polygon, Rect } from 'react-native-svg';
 import { CockpitTheme } from '../theme/cockpitTheme';
 import { TruckControllerState } from '../types/truckState';
+import { CockpitHaptics } from '../utils/haptics';
 
 interface DigitalMFDProps {
   state: TruckControllerState;
   onPressLinkBadge: () => void;
   onToggleSound: () => void;
   onSwitchToFs25: () => void;
+  onToggleTurnSignal: (dir: -1 | 1) => void;
 }
 
 const START = 135;
 const SWEEP = 270;
-const SIZE = 118;
+const SIZE = 94;
 const C = SIZE / 2;
-const R = 50;
+const R = 39;
 
 function polar(r: number, deg: number) {
   const rad = (deg * Math.PI) / 180;
@@ -75,6 +77,7 @@ export const DigitalMFD: React.FC<DigitalMFDProps> = ({
   onPressLinkBadge,
   onToggleSound,
   onSwitchToFs25,
+  onToggleTurnSignal,
 }) => {
   const leftBlink = (state.turnSignal === -1 || state.hazardLights) && state.blinkerPhaseOn;
   const rightBlink = (state.turnSignal === 1 || state.hazardLights) && state.blinkerPhaseOn;
@@ -109,35 +112,44 @@ export const DigitalMFD: React.FC<DigitalMFDProps> = ({
           marker={state.cruiseEnabled ? state.cruiseSpeedKmh / 120 : undefined}
         />
         <View pointerEvents="none" style={styles.dialCenter}>
-          <Text style={styles.bigNum}>{Math.round(state.speedKmh)}</Text>
-          <Text style={styles.unit}>KM/H</Text>
+          <Text allowFontScaling={false} style={styles.bigNum}>{Math.round(state.speedKmh)}</Text>
+          <Text allowFontScaling={false} style={styles.unit}>KM/H</Text>
         </View>
       </View>
 
       {/* CENTER */}
       <View style={styles.center}>
         <View style={styles.topRow}>
-          <View style={[styles.arrow, leftBlink && styles.arrowOn]}>
-            <Text style={[styles.arrowTxt, leftBlink && { color: '#ffffff' }]}>◀</Text>
-          </View>
-          <Pressable onPress={onSwitchToFs25} style={styles.fsSwitchChip}>
-            <Text style={styles.fsSwitchTxt}>⊞ 换座舱</Text>
+          <Pressable
+            onPress={() => {
+              CockpitHaptics.switchClick();
+              onToggleTurnSignal(-1);
+            }}
+            style={[styles.arrow, leftBlink && styles.arrowOn]}
+          >
+            <Text allowFontScaling={false} style={[styles.arrowTxt, leftBlink && { color: '#ffffff' }]}>◀</Text>
           </Pressable>
-          <Pressable onPress={onToggleSound} style={styles.chip}>
-            <Text style={styles.chipTxt}>{state.soundEnabled ? '🔊' : '🔇'}</Text>
+          <Pressable onPress={onSwitchToFs25} style={styles.fsSwitchChip}>
+            <Text allowFontScaling={false} numberOfLines={1} style={styles.fsSwitchTxt}>换座舱</Text>
           </Pressable>
           <Pressable onPress={onPressLinkBadge} style={styles.chip}>
             <View style={[styles.statusDot, { backgroundColor: state.wsConnected ? '#12b76a' : '#ff8a00' }]} />
-            <Text style={styles.chipTxt}>{state.wsConnected ? '在线' : '试驾'}</Text>
+            <Text allowFontScaling={false} numberOfLines={1} style={styles.chipTxt}>{state.wsConnected ? '在线' : '试驾'}</Text>
           </Pressable>
-          <View style={[styles.arrow, rightBlink && styles.arrowOn]}>
-            <Text style={[styles.arrowTxt, rightBlink && { color: '#ffffff' }]}>▶</Text>
-          </View>
+          <Pressable
+            onPress={() => {
+              CockpitHaptics.switchClick();
+              onToggleTurnSignal(1);
+            }}
+            style={[styles.arrow, rightBlink && styles.arrowOn]}
+          >
+            <Text allowFontScaling={false} style={[styles.arrowTxt, rightBlink && { color: '#ffffff' }]}>▶</Text>
+          </Pressable>
         </View>
 
         <View style={styles.lane}>
           <View pointerEvents="none">
-            <Svg width={150} height={42} viewBox="0 0 150 42">
+            <Svg width={150} height={40} viewBox="0 0 150 42">
               <Polygon
                 points={`${62 + laneShift * 0.4},2 ${88 + laneShift * 0.4},2 ${136 + laneShift},42 ${14 + laneShift},42`}
                 fill="#e9e5dd"
@@ -158,14 +170,19 @@ export const DigitalMFD: React.FC<DigitalMFDProps> = ({
               )}
             </Svg>
           </View>
+          <Pressable onPress={onToggleSound} style={styles.soundCornerBtn}>
+            <Text allowFontScaling={false} style={styles.soundCornerTxt}>
+              {state.soundEnabled ? '🔊' : '🔇'}
+            </Text>
+          </Pressable>
           {state.speedLimiter && (
-            <View style={styles.limit}>
-              <Text style={styles.limitTxt}>90</Text>
+            <View pointerEvents="none" style={styles.limit}>
+              <Text allowFontScaling={false} style={styles.limitTxt}>90</Text>
             </View>
           )}
           {state.cruiseEnabled && (
-            <View style={styles.cc}>
-              <Text style={styles.ccTxt}>ACC {state.cruiseSpeedKmh}</Text>
+            <View pointerEvents="none" style={styles.cc}>
+              <Text allowFontScaling={false} style={styles.ccTxt}>ACC {state.cruiseSpeedKmh}</Text>
             </View>
           )}
         </View>
@@ -173,12 +190,12 @@ export const DigitalMFD: React.FC<DigitalMFDProps> = ({
         <View style={styles.lampRow}>
           {lamps.map((l) => (
             <View key={l.t} style={[styles.lamp, l.on && { backgroundColor: l.c }]}>
-              <Text style={[styles.lampTxt, l.on && { color: '#ffffff' }]}>{l.t}</Text>
+              <Text allowFontScaling={false} numberOfLines={1} style={[styles.lampTxt, l.on && { color: '#ffffff' }]}>{l.t}</Text>
             </View>
           ))}
         </View>
 
-        <Text numberOfLines={1} style={styles.ticker}>
+        <Text allowFontScaling={false} numberOfLines={1} style={styles.ticker}>
           气压 {state.airPressureBar.toFixed(1)} bar · 油量 {Math.round(state.fuelRatio * 100)}% · {state.lastCommandTag}
         </Text>
       </View>
@@ -194,8 +211,8 @@ export const DigitalMFD: React.FC<DigitalMFDProps> = ({
           ]}
         />
         <View pointerEvents="none" style={styles.dialCenter}>
-          <Text style={[styles.bigNum, { color: gearColor }]}>{state.gearDisplay}</Text>
-          <Text style={styles.unit}>{Math.round(state.rpm)} RPM</Text>
+          <Text allowFontScaling={false} style={[styles.bigNum, { color: gearColor }]}>{state.gearDisplay}</Text>
+          <Text allowFontScaling={false} style={styles.unit}>{Math.round(state.rpm)} RPM</Text>
         </View>
       </View>
     </View>
@@ -206,11 +223,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   dialCard: {
     width: SIZE,
     height: SIZE,
+    flexShrink: 0,
     borderRadius: SIZE / 2,
     backgroundColor: '#ffffff',
     alignItems: 'center',
@@ -227,7 +245,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bigNum: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: '800',
     color: CockpitTheme.ink,
     letterSpacing: -1,
@@ -235,26 +253,28 @@ const styles = StyleSheet.create({
   },
   unit: {
     marginTop: -2,
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '700',
     color: CockpitTheme.muted,
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
   },
   center: {
     flex: 1,
-    height: SIZE,
+    minWidth: 0,
+    height: SIZE + 6,
     justifyContent: 'space-between',
-    paddingVertical: 2,
+    paddingVertical: 1,
   },
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 5,
+    gap: 4,
   },
   arrow: {
     width: 26,
     height: 22,
+    flexShrink: 0,
     borderRadius: 11,
     backgroundColor: '#ffffff',
     alignItems: 'center',
@@ -265,13 +285,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#12b76a',
   },
   arrowTxt: {
-    fontSize: 9,
+    fontSize: 9.5,
+    fontWeight: '800',
     color: CockpitTheme.muted,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    flexShrink: 0,
+    gap: 3.5,
     paddingHorizontal: 7,
     height: 22,
     borderRadius: 11,
@@ -279,6 +301,7 @@ const styles = StyleSheet.create({
     boxShadow: CockpitTheme.shadowSoft,
   },
   fsSwitchChip: {
+    flexShrink: 1,
     paddingHorizontal: 8,
     height: 22,
     borderRadius: 11,
@@ -304,73 +327,78 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   lane: {
-    height: 46,
-    borderRadius: 14,
+    height: 40,
+    borderRadius: 12,
     backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
     boxShadow: CockpitTheme.shadowSoft,
   },
-  gearBadge: {
+  soundCornerBtn: {
     position: 'absolute',
-    left: 8,
-    top: 6,
+    left: 6,
+    top: 5,
+    width: 22,
+    height: 20,
+    borderRadius: 7,
+    backgroundColor: '#f3f1ec',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  gearTxt: {
-    fontSize: 15,
-    fontWeight: '800',
+  soundCornerTxt: {
+    fontSize: 9.5,
   },
   limit: {
     position: 'absolute',
-    right: 8,
-    top: 6,
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 2.5,
+    right: 6,
+    top: 5,
+    width: 21,
+    height: 21,
+    borderRadius: 10.5,
+    borderWidth: 2.2,
     borderColor: '#f04438',
     backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
   },
   limitTxt: {
-    fontSize: 8.5,
+    fontSize: 8,
     fontWeight: '800',
     color: CockpitTheme.ink,
   },
   cc: {
     position: 'absolute',
-    right: 8,
-    bottom: 5,
+    right: 6,
+    bottom: 3,
     paddingHorizontal: 5,
     borderRadius: 6,
     backgroundColor: '#e8f8f0',
   },
   ccTxt: {
-    fontSize: 8.5,
+    fontSize: 8,
     fontWeight: '800',
     color: '#12b76a',
   },
   lampRow: {
     flexDirection: 'row',
-    gap: 5,
+    gap: 4,
   },
   lamp: {
     flex: 1,
-    height: 20,
-    borderRadius: 10,
+    height: 19,
+    borderRadius: 9.5,
     backgroundColor: CockpitTheme.track,
     alignItems: 'center',
     justifyContent: 'center',
   },
   lampTxt: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: '800',
     color: CockpitTheme.muted,
   },
   ticker: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '600',
     color: CockpitTheme.muted,
     textAlign: 'center',

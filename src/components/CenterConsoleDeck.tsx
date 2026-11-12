@@ -930,7 +930,7 @@ export const CenterConsoleDeck: React.FC<CenterConsoleDeckProps> = React.memo(
                             steeringLock: deg,
                             steeringAngle: Math.max(-deg / 2, Math.min(deg / 2, state.steeringAngle)),
                           },
-                          `LOCK · 方向盘转向觑 ${deg}°`
+                          `LOCK · 方向盘转向角 ${deg}°`
                         );
                       }}
                       style={[styles.degBtn, active && styles.degBtnActive]}

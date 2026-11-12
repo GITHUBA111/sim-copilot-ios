@@ -81,14 +81,14 @@ export const RockerSwitch: React.FC<RockerSwitchProps> = ({
       <View style={styles.topRow} pointerEvents="none">
         <View style={[styles.dot, { backgroundColor: on ? '#ffffff' : guarded ? '#f04438' : '#d9d4c9' }]} />
         {subLabel ? (
-          <Text numberOfLines={1} style={[styles.tag, { color: tagColor }]}>
+          <Text allowFontScaling={false} numberOfLines={1} style={[styles.tag, { color: tagColor }]}>
             {subLabel}
           </Text>
         ) : null}
       </View>
-      <View style={[styles.center, tight && { paddingTop: 0 }]}>
-        <TruckIcon name={icon} size={tight ? 16 : 20} color={fg} />
-        <Text numberOfLines={1} style={[styles.label, { color: fg }]}>
+      <View style={[styles.center, tight && { paddingTop: 5 }]}>
+        <TruckIcon name={icon} size={tight ? 15 : 20} color={fg} />
+        <Text allowFontScaling={false} numberOfLines={1} style={[styles.label, { color: fg }]}>
           {label}
         </Text>
       </View>

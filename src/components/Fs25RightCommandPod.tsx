@@ -206,8 +206,8 @@ export const Fs25RightCommandPod: React.FC<Fs25RightCommandPodProps> = React.mem
 
 const styles = StyleSheet.create({
   container: {
-    width: 158,
-    paddingHorizontal: 8,
+    width: 150,
+    paddingHorizontal: 7,
     paddingVertical: 8,
     justifyContent: 'space-between',
     gap: 7,

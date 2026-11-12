@@ -16,13 +16,14 @@ interface TractorMFDProps {
   onToggleLayout: () => void;
   onPressLinkBadge: () => void;
   onToggleSound: () => void;
+  onToggleTurnSignal: (dir: -1 | 1) => void;
 }
 
 const START = 135;
 const SWEEP = 270;
-const SIZE = 106;
+const SIZE = 90;
 const C = SIZE / 2;
-const R = 44;
+const R = 37;
 const AGRI_GREEN = '#15803d';
 const AGRI_AMBER = '#d97706';
 
@@ -92,6 +93,7 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
   onToggleLayout,
   onPressLinkBadge,
   onToggleSound,
+  onToggleTurnSignal,
 }) => {
   const leftBlink = (fs.turnSignal === -1 || fs.hazardLights) && blinkerPhaseOn;
   const rightBlink = (fs.turnSignal === 1 || fs.hazardLights) && blinkerPhaseOn;
@@ -123,17 +125,23 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
           marker={fs.cruiseEnabled ? fs.cruiseTargetKmh / 55 : undefined}
         />
         <View pointerEvents="none" style={styles.dialCenter}>
-          <Text style={styles.bigNum}>{Math.round(fs.speedKmh)}</Text>
-          <Text style={styles.unit}>KM/H</Text>
+          <Text allowFontScaling={false} style={styles.bigNum}>{Math.round(fs.speedKmh)}</Text>
+          <Text allowFontScaling={false} style={styles.unit}>KM/H</Text>
         </View>
       </View>
 
       {/* CENTER PRECISION FARMING & MODE BAR */}
       <View style={styles.center}>
         <View style={styles.topRow}>
-          <View style={[styles.arrow, leftBlink && styles.arrowOn]}>
-            <Text style={[styles.arrowTxt, leftBlink && { color: '#ffffff' }]}>◀</Text>
-          </View>
+          <Pressable
+            onPress={() => {
+              CockpitHaptics.switchClick();
+              onToggleTurnSignal(-1);
+            }}
+            style={[styles.arrow, leftBlink && styles.arrowOn]}
+          >
+            <Text allowFontScaling={false} style={[styles.arrowTxt, leftBlink && { color: '#ffffff' }]}>◀</Text>
+          </Pressable>
 
           <Pressable
             onPress={() => {
@@ -142,7 +150,7 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
             }}
             style={styles.gameSwitchChip}
           >
-            <Text style={styles.gameSwitchTxt}>⊞ 换座舱</Text>
+            <Text allowFontScaling={false} numberOfLines={1} style={styles.gameSwitchTxt}>座舱</Text>
           </Pressable>
 
           <Pressable
@@ -152,13 +160,13 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
             }}
             style={[styles.layoutChip, fs.layout === 'sidepanel' && styles.layoutChipSide]}
           >
-            <Text style={[styles.layoutChipTxt, fs.layout === 'sidepanel' && { color: '#ffffff' }]}>
-              {fs.layout === 'sidepanel' ? '🕹️侧台' : '🚜全驾'}
+            <Text
+              allowFontScaling={false}
+              numberOfLines={1}
+              style={[styles.layoutChipTxt, fs.layout === 'sidepanel' && { color: '#ffffff' }]}
+            >
+              {fs.layout === 'sidepanel' ? '侧台' : '全驾'}
             </Text>
-          </Pressable>
-
-          <Pressable onPress={onToggleSound} style={styles.chip}>
-            <Text style={styles.chipTxt}>{soundEnabled ? '🔊' : '🔇'}</Text>
           </Pressable>
 
           <Pressable onPress={onPressLinkBadge} style={styles.chip}>
@@ -168,12 +176,20 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
                 { backgroundColor: wsConnected ? '#12b76a' : AGRI_AMBER },
               ]}
             />
-            <Text style={styles.chipTxt}>{wsConnected ? '在线' : '试驾'}</Text>
+            <Text allowFontScaling={false} numberOfLines={1} style={styles.chipTxt}>
+              {wsConnected ? '在线' : '试驾'}
+            </Text>
           </Pressable>
 
-          <View style={[styles.arrow, rightBlink && styles.arrowOn]}>
-            <Text style={[styles.arrowTxt, rightBlink && { color: '#ffffff' }]}>▶</Text>
-          </View>
+          <Pressable
+            onPress={() => {
+              CockpitHaptics.switchClick();
+              onToggleTurnSignal(1);
+            }}
+            style={[styles.arrow, rightBlink && styles.arrowOn]}
+          >
+            <Text allowFontScaling={false} style={[styles.arrowTxt, rightBlink && { color: '#ffffff' }]}>▶</Text>
+          </Pressable>
         </View>
 
         {/* FS25 Crop Furrow & GPS Steering Assist Visualizer */}
@@ -225,13 +241,19 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
             </Svg>
           </View>
 
-          <View style={styles.slotBadge}>
-            <Text style={styles.slotBadgeTxt}>{FS25_TOOL_SLOTS[fs.activeToolSlot]}</Text>
+          <View pointerEvents="none" style={styles.slotBadge}>
+            <Text allowFontScaling={false} style={styles.slotBadgeTxt}>{FS25_TOOL_SLOTS[fs.activeToolSlot]}</Text>
           </View>
 
+          <Pressable onPress={onToggleSound} style={styles.soundCornerBtn}>
+            <Text allowFontScaling={false} style={styles.soundCornerTxt}>
+              {soundEnabled ? '🔊' : '🔇'}
+            </Text>
+          </Pressable>
+
           {fs.cruiseEnabled && (
-            <View style={styles.ccBadge}>
-              <Text style={styles.ccBadgeTxt}>CC {fs.cruiseTargetKmh}</Text>
+            <View pointerEvents="none" style={styles.ccBadge}>
+              <Text allowFontScaling={false} style={styles.ccBadgeTxt}>CC {fs.cruiseTargetKmh}</Text>
             </View>
           )}
         </View>
@@ -239,12 +261,12 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
         <View style={styles.lampRow}>
           {lamps.map((l) => (
             <View key={l.t} style={[styles.lamp, l.on && { backgroundColor: l.c }]}>
-              <Text style={[styles.lampTxt, l.on && { color: '#ffffff' }]}>{l.t}</Text>
+              <Text allowFontScaling={false} numberOfLines={1} style={[styles.lampTxt, l.on && { color: '#ffffff' }]}>{l.t}</Text>
             </View>
           ))}
         </View>
 
-        <Text numberOfLines={1} style={styles.ticker}>
+        <Text allowFontScaling={false} numberOfLines={1} style={styles.ticker}>
           {fs.toolLowered ? '农具作业中' : '农具抬起'} · {lastCommandTag}
         </Text>
       </View>
@@ -260,8 +282,8 @@ export const TractorMFD: React.FC<TractorMFDProps> = ({
           ]}
         />
         <View pointerEvents="none" style={styles.dialCenter}>
-          <Text style={[styles.bigNum, { color: shuttleColor }]}>{fs.shuttleDir}</Text>
-          <Text style={styles.unit}>{Math.round(fs.rpm)} RPM</Text>
+          <Text allowFontScaling={false} style={[styles.bigNum, { color: shuttleColor }]}>{fs.shuttleDir}</Text>
+          <Text allowFontScaling={false} style={styles.unit}>{Math.round(fs.rpm)} RPM</Text>
         </View>
       </View>
     </View>
@@ -272,11 +294,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 7,
+    gap: 6,
   },
   dialCard: {
     width: SIZE,
     height: SIZE,
+    flexShrink: 0,
     borderRadius: SIZE / 2,
     backgroundColor: '#ffffff',
     alignItems: 'center',
@@ -293,7 +316,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bigNum: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: '800',
     color: CockpitTheme.ink,
     letterSpacing: -0.8,
@@ -301,14 +324,15 @@ const styles = StyleSheet.create({
   },
   unit: {
     marginTop: -2,
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '700',
     color: CockpitTheme.muted,
-    letterSpacing: 0.6,
+    letterSpacing: 0.5,
   },
   center: {
     flex: 1,
-    height: SIZE + 6,
+    minWidth: 0,
+    height: SIZE + 8,
     justifyContent: 'space-between',
     paddingVertical: 1,
   },
@@ -316,11 +340,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 4,
+    gap: 3,
   },
   arrow: {
-    width: 22,
+    width: 24,
     height: 21,
+    flexShrink: 0,
     borderRadius: 10.5,
     backgroundColor: '#ffffff',
     alignItems: 'center',
@@ -331,11 +356,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#12b76a',
   },
   arrowTxt: {
-    fontSize: 8.5,
+    fontSize: 9,
+    fontWeight: '800',
     color: CockpitTheme.muted,
   },
   gameSwitchChip: {
-    paddingHorizontal: 7,
+    flexShrink: 1,
+    paddingHorizontal: 6,
     height: 21,
     borderRadius: 10.5,
     backgroundColor: '#fff0e6',
@@ -345,12 +372,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   gameSwitchTxt: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '800',
     color: '#c2410c',
   },
   layoutChip: {
-    paddingHorizontal: 7,
+    flexShrink: 1,
+    paddingHorizontal: 6,
     height: 21,
     borderRadius: 10.5,
     backgroundColor: '#ffffff',
@@ -362,22 +390,23 @@ const styles = StyleSheet.create({
     backgroundColor: AGRI_GREEN,
   },
   layoutChipTxt: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '800',
     color: CockpitTheme.inkSoft,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 0,
     gap: 3,
-    paddingHorizontal: 6,
+    paddingHorizontal: 5.5,
     height: 21,
     borderRadius: 10.5,
     backgroundColor: '#ffffff',
     boxShadow: CockpitTheme.shadowSoft,
   },
   chipTxt: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontWeight: '700',
     color: CockpitTheme.inkSoft,
   },
@@ -387,7 +416,7 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
   fieldCanvas: {
-    height: 40,
+    height: 38,
     borderRadius: 12,
     backgroundColor: '#ffffff',
     alignItems: 'center',
@@ -397,29 +426,43 @@ const styles = StyleSheet.create({
   },
   slotBadge: {
     position: 'absolute',
-    left: 6,
-    top: 5,
-    paddingHorizontal: 5,
+    left: 5,
+    top: 4,
+    paddingHorizontal: 4.5,
     paddingVertical: 1.5,
     borderRadius: 5,
     backgroundColor: '#fef3c7',
   },
   slotBadgeTxt: {
-    fontSize: 8,
+    fontSize: 7.5,
     fontWeight: '800',
     color: '#92400e',
   },
+  soundCornerBtn: {
+    position: 'absolute',
+    right: 5,
+    top: 3,
+    width: 20,
+    height: 18,
+    borderRadius: 6,
+    backgroundColor: '#f3f1ec',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  soundCornerTxt: {
+    fontSize: 9,
+  },
   ccBadge: {
     position: 'absolute',
-    right: 6,
-    bottom: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 1.5,
+    right: 5,
+    bottom: 3,
+    paddingHorizontal: 4.5,
+    paddingVertical: 1,
     borderRadius: 5,
     backgroundColor: '#dcfce7',
   },
   ccBadgeTxt: {
-    fontSize: 8,
+    fontSize: 7.5,
     fontWeight: '800',
     color: AGRI_GREEN,
   },
@@ -429,8 +472,8 @@ const styles = StyleSheet.create({
   },
   lamp: {
     flex: 1,
-    height: 19,
-    borderRadius: 9.5,
+    height: 18,
+    borderRadius: 9,
     backgroundColor: CockpitTheme.track,
     alignItems: 'center',
     justifyContent: 'center',

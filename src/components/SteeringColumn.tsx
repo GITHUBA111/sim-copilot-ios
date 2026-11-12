@@ -265,7 +265,13 @@ export const SteeringColumn: React.FC<SteeringColumnProps> = ({
             turnSignal === -1 && blinkerPhaseOn && styles.signalPaddleActive,
           ]}
         >
-          <Text style={[styles.signalArrow, turnSignal === -1 && { color: '#ffffff' }]}>◄ 左转</Text>
+          <Text
+            allowFontScaling={false}
+            numberOfLines={1}
+            style={[styles.signalArrow, turnSignal === -1 && { color: '#ffffff' }]}
+          >
+            ◄ 左转
+          </Text>
         </Pressable>
 
         <Pressable
@@ -276,11 +282,13 @@ export const SteeringColumn: React.FC<SteeringColumnProps> = ({
           }}
           style={styles.angleCenterPill}
         >
-          <Text style={styles.angleNum}>
+          <Text allowFontScaling={false} numberOfLines={1} style={styles.angleNum}>
             {steeringAngle > 0.4 ? '+' : ''}
             {steeringAngle.toFixed(0)}°
           </Text>
-          <Text style={styles.angleResetHint}>归零</Text>
+          <Text allowFontScaling={false} numberOfLines={1} style={styles.angleResetHint}>
+            归零
+          </Text>
         </Pressable>
 
         <Pressable
@@ -293,7 +301,13 @@ export const SteeringColumn: React.FC<SteeringColumnProps> = ({
             turnSignal === 1 && blinkerPhaseOn && styles.signalPaddleActive,
           ]}
         >
-          <Text style={[styles.signalArrow, turnSignal === 1 && { color: '#ffffff' }]}>右转 ►</Text>
+          <Text
+            allowFontScaling={false}
+            numberOfLines={1}
+            style={[styles.signalArrow, turnSignal === 1 && { color: '#ffffff' }]}
+          >
+            右转 ►
+          </Text>
         </Pressable>
       </View>
 
@@ -604,21 +618,24 @@ export const SteeringColumn: React.FC<SteeringColumnProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    width: '28.5%',
-    minWidth: 214,
+    width: '28%',
+    minWidth: 204,
     maxWidth: 280,
     paddingHorizontal: 8,
     paddingVertical: 8,
     justifyContent: 'space-between',
     gap: 7,
   },
-  collarBar: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  collarBar: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   signalPaddle: {
     flex: 1,
+    minWidth: 52,
+    paddingHorizontal: 4,
     paddingVertical: 8,
     borderRadius: 12,
     backgroundColor: '#ffffff',
     alignItems: 'center',
+    justifyContent: 'center',
     boxShadow: CockpitTheme.shadowSoft,
   },
   signalPaddleActive: { backgroundColor: '#12b76a' },
@@ -626,19 +643,20 @@ const styles = StyleSheet.create({
   angleCenterPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 0,
     backgroundColor: '#ffffff',
-    paddingHorizontal: 9,
+    paddingHorizontal: 7,
     paddingVertical: 7,
     borderRadius: 12,
-    gap: 4,
+    gap: 3,
     boxShadow: CockpitTheme.shadowSoft,
   },
   angleNum: {
-    fontSize: 12.5,
+    fontSize: 12,
     fontWeight: '800',
     color: CockpitTheme.ink,
     fontVariant: ['tabular-nums'],
-    minWidth: 32,
+    minWidth: 28,
     textAlign: 'right',
   },
   angleResetHint: { fontSize: 9, fontWeight: '700', color: CockpitTheme.muted },
