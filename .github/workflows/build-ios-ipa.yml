@@ -26,14 +26,14 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Setup Node.js 22
+      - name: Setup Node.js 24
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm ci || npm install
 
       - name: Expo Prebuild iOS Native Project
         env:
